@@ -707,7 +707,7 @@
         if (document.getElementById("saveSupa").onclick() === false) return;
         try {
           const syncedSurvey = await syncActiveCompanyToSupabase(c);
-          await loadSupabaseCompanies();
+          const syncStats = await loadSupabaseCompanies();
           const afterLoad = activeCompany();
           if (afterLoad && syncedSurvey && !afterLoad.publicToken) {
             afterLoad.remoteSurveyId = syncedSurvey.id;
@@ -715,8 +715,9 @@
             saveState();
           }
           renderSetup(activeCompany());
-          document.getElementById("supaStatus").textContent = "Sincronizacao concluida. Copie o link de resposta ou abra o questionario para testar.";
-          alert("Sincronizacao concluida. O link publico de resposta ja foi gerado no bloco Link de resposta.");
+          const msg = `Sincronizacao concluida. Empresas: ${syncStats?.companies || 0}. Respostas carregadas: ${syncStats?.responses || 0}.`;
+          document.getElementById("supaStatus").textContent = msg;
+          alert(msg + " Se existirem respostas, veja o separador Respostas.");
         } catch (err) {
           alert("Erro Supabase: " + err.message);
         }
@@ -1293,10 +1294,12 @@
       }
       const companies = [];
       for (const row of clients || []) {
-        const survey = surveys.find(s => s.client_id === row.id);
+        const companySurveys = surveys.filter(s => s.client_id === row.id);
+        const survey = companySurveys[0];
         let responses = [];
-        if (survey) {
-          const { data, error } = await client.from("clima_responses").select("*").eq("survey_id", survey.id).order("submitted_at", { ascending: true });
+        if (companySurveys.length) {
+          const surveyIds = companySurveys.map(s => s.id);
+          const { data, error } = await client.from("clima_responses").select("*").in("survey_id", surveyIds).order("submitted_at", { ascending: true });
           if (error) throw error;
           responses = (data || []).map(fromSupabaseResponse);
         }
@@ -1320,6 +1323,10 @@
         activeCompanyId = companies[0].id;
         saveState();
       }
+      return {
+        companies: companies.length,
+        responses: companies.reduce((sum, company) => sum + (company.responses || []).length, 0)
+      };
     }
 
     function fromSupabaseResponse(r) {
