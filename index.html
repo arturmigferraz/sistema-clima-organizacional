@@ -693,7 +693,9 @@
           const { data, error } = await client.auth.signInWithPassword({ email, password });
           if (error) return alert("Erro de login: " + error.message);
           supaUser = data.user;
-          document.getElementById("supaStatus").textContent = "Login efetuado: " + supaUser.email;
+          const syncStats = await loadSupabaseCompanies();
+          renderSetup(activeCompany());
+          document.getElementById("supaStatus").textContent = `Login efetuado: ${supaUser.email}. Empresas: ${syncStats?.companies || 0}. Respostas carregadas: ${syncStats?.responses || 0}.`;
         } catch (err) {
           const msg = String(err?.message || err);
           if (msg.includes("Unexpected token '<'") || msg.includes("<html")) {
@@ -706,6 +708,16 @@
       document.getElementById("syncSupa").onclick = async () => {
         if (document.getElementById("saveSupa").onclick() === false) return;
         try {
+          if (!c.remoteClientId) {
+            const existingStats = await loadSupabaseCompanies();
+            if (existingStats?.companies) {
+              renderSetup(activeCompany());
+              const msg = `Dados carregados do Supabase. Empresas: ${existingStats.companies}. Respostas carregadas: ${existingStats.responses || 0}.`;
+              document.getElementById("supaStatus").textContent = msg;
+              alert(msg + " Veja o separador Respostas.");
+              return;
+            }
+          }
           const syncedSurvey = await syncActiveCompanyToSupabase(c);
           const syncStats = await loadSupabaseCompanies();
           const afterLoad = activeCompany();
