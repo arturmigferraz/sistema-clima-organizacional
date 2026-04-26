@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Clima Organizacional | Consultora</title>
+  <style>
+    :root {
+      --ink: #14252d;
+      --muted: #60717a;
+      --line: #d9e4e6;
+      --paper: #f7faf9;
+      --white: #ffffff;
+      --brand: #1f4e5f;
+      --teal: #008f95;
+      --green: #2e7d32;
+      --amber: #b7791f;
+      --red: #b3261e;
+      --blue: #2458a7;
+      --shadow: 0 10px 28px rgba(20, 37, 45, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Aptos, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      letter-spacing: 0;
+    }
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .bar {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brandmark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(0,143,149,.96), rgba(31,78,95,.98)),
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,.35), transparent 35%);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    h1, h2, h3, h4 { margin: 0; color: var(--brand); }
+    h1 { font-size: 20px; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    button, .btn {
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      min-height: 36px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font: inherit;
+      white-space: nowrap;
+    }
+    button.primary { background: var(--brand); color: white; border-color: var(--brand); }
+    button.teal { background: var(--teal); color: white; border-color: var(--teal); }
+    button.danger { color: var(--red); border-color: #f0c5c1; }
+    button.active { background: #e7f2f3; border-color: var(--teal); color: var(--brand); font-weight: 700; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    main { max-width: 1320px; margin: 0 auto; padding: 22px 24px 48px; }
+    .grid { display: grid; gap: 16px; }
+    .cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .panel h2 { font-size: 18px; margin-bottom: 10px; }
+    .panel h3 { font-size: 15px; margin-bottom: 8px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font: inherit;
+      background: white;
+      color: var(--ink);
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    .field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .kpi {
+      border-left: 4px solid var(--teal);
+      background: #fbfdfd;
+      padding: 12px;
+      border-radius: 8px;
+      min-height: 94px;
+    }
+    .kpi .value { font-size: 28px; font-weight: 800; color: var(--brand); margin-top: 7px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef4f4;
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .tag.good { background: #e7f3e8; color: var(--green); }
+    .tag.warn { background: #fff4da; color: var(--amber); }
+    .tag.risk { background: #fce9e7; color: var(--red); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--brand); font-size: 12px; background: #f0f6f6; }
+    .hide { display: none !important; }
+    .barline {
+      height: 10px;
+      background: #e9eef0;
+      border-radius: 999px;
+      overflow: hidden;
+      min-width: 120px;
+    }
+    .fill { height: 100%; background: var(--teal); width: 0%; }
+    .fill.good { background: var(--green); }
+    .fill.warn { background: var(--amber); }
+    .fill.risk { background: var(--red); }
+    .question {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 260px;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .scale label {
+      margin: 0;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+    }
+    .scale input { width: auto; margin: 0 0 5px; display: block; margin-left: auto; margin-right: auto; }
+    .dimension-title {
+      margin-top: 18px;
+      padding: 10px 12px;
+      background: #eaf4f4;
+      border-left: 4px solid var(--teal);
+      border-radius: 8px;
+      color: var(--brand);
+      font-weight: 800;
+    }
+    .report {
+      background: white;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .report h2 { margin-top: 24px; }
+    .report p { line-height: 1.42; }
+    .source-list li { margin-bottom: 7px; }
+    .empty {
+      padding: 28px;
+      border: 1px dashed var(--line);
+      text-align: center;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #fbfdfd;
+    }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+    canvas { width: 100%; height: 240px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+    @media (max-width: 900px) {
+      .cols-2, .cols-3, .cols-4, .field-row { grid-template-columns: 1fr; }
+      .bar { align-items: flex-start; flex-direction: column; }
+      .tabs { justify-content: flex-start; }
+      .question { grid-template-columns: 1fr; }
+    }
+    @media print {
+      header, .no-print, #adminViews > section:not(#view-report), #surveyView { display: none !important; }
+      body { background: white; }
+      main { padding: 0; max-width: none; }
+      .report { border: 0; box-shadow: none; padding: 0; }
+      .panel { box-shadow: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="no-print">
+    <div class="bar">
+      <div class="brandmark">
+        <div class="logo">CO</div>
+        <div>
+          <h1>Sistema de Clima Organizacional</h1>
+          <div class="sub">Gestão multiempresa, questionário, análise automática e relatório cliente</div>
+        </div>
+      </div>
+      <nav class="tabs" id="tabs">
+        <button data-view="setup" class="active">Empresas</button>
+        <button data-view="questionnaire">Questionário</button>
+        <button data-view="responses">Respostas</button>
+        <button data-view="analytics">Análise</button>
+        <button data-view="report">Relatório</button>
+        <button data-view="method">Método</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="surveyView" class="hide"></section>
+    <div id="adminViews">
+      <section id="view-setup" class="view"></section>
+      <section id="view-questionnaire" class="view hide"></section>
+      <section id="view-responses" class="view hide"></section>
+      <section id="view-analytics" class="view hide"></section>
+      <section id="view-report" class="view hide"></section>
+      <section id="view-method" class="view hide"></section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const DIMENSIONS = [
+      { id: "D01", name: "Visão sobre a empresa", questions: [
+        "A organização tem uma imagem e reputação positivas no mercado.",
+        "Tenho orgulho em pertencer a esta organização.",
+        "Conheço os objetivos e o rumo da organização para os próximos 12 meses.",
+        "As decisões são tomadas de forma clara e coerente com a estratégia."
+      ]},
+      { id: "D02", name: "Função, autonomia e clareza", questions: [
+        "A função que desempenho é motivante.",
+        "Consigo aplicar as minhas competências no trabalho que realizo.",
+        "Sei exatamente quais são as minhas atividades e responsabilidades.",
+        "Tenho autonomia adequada para desempenhar as minhas tarefas."
+      ]},
+      { id: "D03", name: "Papel e contributo individual", questions: [
+        "Sei o que é esperado da minha função.",
+        "Percebo como o meu trabalho contribui para os objetivos da organização.",
+        "Conheço as funções das pessoas com quem interajo diretamente.",
+        "Sinto que o meu contributo é reconhecido."
+      ]},
+      { id: "D04", name: "Liderança e apoio da chefia", questions: [
+        "A minha chefia direta apoia-me no trabalho que desenvolvo.",
+        "Existe cooperação entre chefias e equipas.",
+        "A gestão de topo está disponível e atenta às questões do dia-a-dia.",
+        "Recebo feedback útil para melhorar o meu desempenho."
+      ]},
+      { id: "D05", name: "Trabalho de equipa e cooperação", questions: [
+        "Existe espírito de entreajuda e cooperação entre colegas.",
+        "As equipas colaboram bem entre si para resolver problemas.",
+        "A organização promove momentos de convívio e proximidade.",
+        "Os conflitos são tratados de forma construtiva."
+      ]},
+      { id: "D06", name: "Comunicação e alinhamento", questions: [
+        "Existe boa comunicação entre colaboradores.",
+        "Tenho acesso à informação necessária para executar o meu trabalho.",
+        "A informação flui bem entre departamentos na resolução de problemas.",
+        "As mudanças relevantes são comunicadas de forma atempada."
+      ]},
+      { id: "D07", name: "Remuneração, equidade e condições", questions: [
+        "O horário de trabalho ajusta-se à minha vida pessoal/familiar.",
+        "A organização transmite segurança e estabilidade.",
+        "As minhas condições salariais são ajustadas à função que desempenho.",
+        "A minha remuneração é equivalente à de colegas com experiência e funções comparáveis."
+      ]},
+      { id: "D08", name: "Carreira e desenvolvimento", questions: [
+        "A aquisição de competências aumenta as minhas oportunidades de progressão.",
+        "A experiência e antiguidade são consideradas na evolução profissional.",
+        "A definição de objetivos contribui para melhorar o meu desempenho.",
+        "Vejo oportunidades de crescimento dentro da organização."
+      ]},
+      { id: "D09", name: "Formação e aprendizagem", questions: [
+        "Recebo formação ajustada ao desenvolvimento da minha função.",
+        "A formação recebida é útil para o meu trabalho.",
+        "Tenho oportunidade de aprender com colegas e chefias.",
+        "A organização investe no desenvolvimento das pessoas."
+      ]},
+      { id: "D10", name: "Recursos, instalações e ferramentas", questions: [
+        "As condições disponíveis para executar o meu trabalho são adequadas.",
+        "Tenho acesso aos recursos necessários para realizar o meu trabalho.",
+        "As ferramentas digitais/sistemas facilitam o trabalho diário.",
+        "Os processos internos são simples e ajudam a trabalhar melhor."
+      ]},
+      { id: "D11", name: "Saúde, segurança e bem-estar", questions: [
+        "As condições de higiene, segurança e saúde no trabalho são adequadas.",
+        "A carga de trabalho é equilibrada e sustentável.",
+        "Consigo manter um bom equilíbrio entre vida profissional e pessoal.",
+        "A organização preocupa-se com o bem-estar das pessoas."
+      ]},
+      { id: "D12", name: "Gestão do tempo, assiduidade e engagement", questions: [
+        "As regras de assiduidade e pontualidade são claras.",
+        "O registo de horas é usado de forma justa e transparente.",
+        "A flexibilidade/remoto/híbrido é gerida de forma equilibrada.",
+        "Recomendaria esta organização como um bom lugar para trabalhar."
+      ]}
+    ];
+
+    const SOURCES = [
+      {
+        name: "Pew Research Center - Writing Survey Questions",
+        url: "https://www.pewresearch.org/our-methods/u-s-surveys/writing-survey-questions/",
+        use: "Perguntas simples, evitar formulações ambíguas, pré-teste, atenção à ordem das perguntas e consistência para medir evolução."
+      },
+      {
+        name: "GOV.UK Service Manual - Informed consent for research",
+        url: "https://www.gov.uk/service-manual/user-research/getting-users-consent-for-research",
+        use: "Consentimento informado: quem recolhe, finalidade, dados recolhidos, uso dos resultados, voluntariedade, retenção e direitos."
+      },
+      {
+        name: "GOV.UK Service Manual - Managing research data and participant privacy",
+        url: "https://www.gov.uk/service-manual/user-research/managing-user-research-data-participant-privacy",
+        use: "Minimização de dados, uso dentro da finalidade consentida, retenção definida e eliminação quando deixa de ser necessário."
+      },
+      {
+        name: "NIST Privacy Framework",
+        url: "https://www.nist.gov/privacy-framework",
+        use: "Gestão de risco de privacidade, proteção de indivíduos e desenho de processos escaláveis com controlo de dados."
+      },
+      {
+        name: "Online Surveys - Respondent anonymity",
+        url: "https://www.onlinesurveys.ac.uk/help-support/respondent-anonymity-and-online-surveys/",
+        use: "Anonimato depende também do desenho: evitar identificadores diretos e combinações demográficas demasiado específicas."
+      }
+    ];
+
+    const STORAGE_KEY = "consultora_clima_sistema_v2";
+    const SUPABASE_KEY = "consultora_clima_supabase_v1";
+    const supaConfig = loadSupabaseConfig();
+    let supa = null;
+    let supaUser = null;
+    const state = loadState();
+    let activeCompanyId = state.activeCompanyId || null;
+
+    function loadSupabaseConfig() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("supaUrl") && params.get("supaKey")) {
+        return { enabled: true, url: params.get("supaUrl"), anonKey: params.get("supaKey") };
+      }
+      try {
+        return JSON.parse(localStorage.getItem(SUPABASE_KEY)) || { enabled: false, url: "", anonKey: "" };
+      } catch (e) {
+        return { enabled: false, url: "", anonKey: "" };
+      }
+    }
+
+    function saveSupabaseConfig() {
+      localStorage.setItem(SUPABASE_KEY, JSON.stringify(supaConfig));
+    }
+
+    function getSupabase() {
+      if (!supaConfig.enabled || !supaConfig.url || !supaConfig.anonKey || !window.supabase) return null;
+      if (!supa) supa = window.supabase.createClient(supaConfig.url, supaConfig.anonKey);
+      return supa;
+    }
+
+    async function refreshSupabaseUser() {
+      const client = getSupabase();
+      if (!client) { supaUser = null; return null; }
+      const { data } = await client.auth.getUser();
+      supaUser = data?.user || null;
+      return supaUser;
+    }
+
+    function defaultCompany() {
+      return {
+        id: "demo-" + Math.random().toString(36).slice(2, 8),
+        name: "Cliente Demonstração",
+        sector: "Serviços / Tecnologia",
+        expected: 80,
+        departments: ["Administração", "Sistemas de Informação", "Consultoria", "Comercial", "Design", "Operações"],
+        areas: ["Gestão/Administração", "Técnica/Operacional", "Comercial", "Suporte", "Consultoria", "Design/Produto"],
+        locations: ["Sede", "Unidade 2", "Remoto/Híbrido"],
+        createdAt: new Date().toISOString(),
+        responses: sampleResponses()
+      };
+    }
+
+    function sampleResponses() {
+      const genders = ["Mulher", "Homem", "Mulher", "Homem", "Mulher", "Prefiro não responder"];
+      const ages = ["26-35", "36-45", "26-35", "46-55", "18-25", "36-45"];
+      const areas = ["Técnica/Operacional", "Consultoria", "Comercial", "Suporte", "Design/Produto", "Gestão/Administração"];
+      const tenures = ["1-2 anos", "3-6 anos", "7-15 anos", "<1 ano", "3-6 anos", ">15 anos"];
+      const rows = [];
+      for (let i = 0; i < 18; i++) {
+        const base = 3 + (i % 5) * 0.25;
+        const answers = {};
+        let qn = 1;
+        DIMENSIONS.forEach((d, di) => {
+          d.questions.forEach(() => {
+            let val = Math.round(Math.max(1, Math.min(5, base + ((di % 4) - 1.5) * .25 + ((i + di) % 3 === 0 ? -.6 : .2))));
+            if (["D06", "D07", "D11"].includes(d.id)) val = Math.max(1, val - 1);
+            answers["Q" + String(qn).padStart(2, "0")] = val;
+            qn++;
+          });
+        });
+        rows.push({
+          id: "R" + String(i + 1).padStart(3, "0"),
+          date: new Date(Date.now() - i * 86400000).toISOString(),
+          consent: true,
+          gender: genders[i % genders.length],
+          age: ages[i % ages.length],
+          area: areas[i % areas.length],
+          department: ["Sistemas de Informação", "Consultoria", "Comercial", "Design", "Operações"][i % 5],
+          location: ["Sede", "Unidade 2", "Remoto/Híbrido"][i % 3],
+          tenure: tenures[i % tenures.length],
+          workMode: ["Presencial", "Híbrido", "Remoto"][i % 3],
+          enps: [6, 7, 8, 9, 10, 6, 8, 9][i % 8],
+          open1: i % 3 === 0 ? "Boa relação entre colegas e orgulho no produto." : "",
+          open2: i % 4 === 0 ? "Comunicação, prioridades e processos internos." : "",
+          open3: i % 5 === 0 ? "Mais feedback das chefias e melhor planeamento." : "",
+          answers
+        });
+      }
+      return rows;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      const initial = { companies: [], activeCompanyId: null };
+      const demo = defaultCompany();
+      initial.companies.push(demo);
+      initial.activeCompanyId = demo.id;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      return initial;
+    }
+
+    function saveState() {
+      state.activeCompanyId = activeCompanyId;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function activeCompany() {
+      return state.companies.find(c => c.id === activeCompanyId) || state.companies[0];
+    }
+
+    function surveyUrl(c) {
+      const base = location.href.split("#")[0].split("?")[0];
+      if (c.publicToken && supaConfig.enabled && supaConfig.url && supaConfig.anonKey) {
+        const qs = new URLSearchParams({ supaUrl: supaConfig.url, supaKey: supaConfig.anonKey }).toString();
+        return `${base}?${qs}#survey/supa/${c.publicToken}`;
+      }
+      return `${base}#survey/${c.id}`;
+    }
+
+    function esc(v) {
+      return String(v ?? "").replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
+    }
+
+    function qid(n) { return "Q" + String(n).padStart(2, "0"); }
+    function allQuestions() {
+      const arr = [];
+      let n = 1;
+      DIMENSIONS.forEach(d => d.questions.forEach(q => arr.push({ id: qid(n++), dimension: d.name, dimensionId: d.id, text: q })));
+      return arr;
+    }
+
+    function avg(values) {
+      const nums = values.map(Number).filter(Number.isFinite);
+      return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+    }
+
+    function fmt(n, d = 1) { return Number.isFinite(n) ? n.toFixed(d).replace(".", ",") : "0,0"; }
+
+    function classify(score) {
+      if (score >= 4) return { label: "Ponto forte", cls: "good", action: "Consolidar e comunicar boas práticas." };
+      if (score >= 3.3) return { label: "Atenção", cls: "warn", action: "Acompanhar e clarificar expectativas." };
+      if (score >= 2.8) return { label: "Risco", cls: "risk", action: "Investigar causas e definir ações rápidas." };
+      return { label: "Prioridade crítica", cls: "risk", action: "Intervenção prioritária com plano dedicado." };
+    }
+
+    function compute(company = activeCompany()) {
+      const responses = company?.responses || [];
+      const qs = allQuestions();
+      const dimensionRows = DIMENSIONS.map(d => {
+        const ids = qs.filter(q => q.dimensionId === d.id).map(q => q.id);
+        const values = [];
+        responses.forEach(r => ids.forEach(id => values.push(r.answers?.[id])));
+        const score = avg(values);
+        return { id: d.id, name: d.name, score, count: values.filter(Number.isFinite).length, ...classify(score) };
+      });
+      const global = avg(dimensionRows.map(d => d.score).filter(Boolean));
+      const enpsVals = responses.map(r => Number(r.enps)).filter(Number.isFinite);
+      const promoters = enpsVals.filter(v => v >= 9).length;
+      const detractors = enpsVals.filter(v => v <= 6).length;
+      const enps = enpsVals.length ? Math.round(((promoters - detractors) / enpsVals.length) * 100) : 0;
+      const low = [...dimensionRows].sort((a, b) => a.score - b.score).slice(0, 4);
+      const high = [...dimensionRows].sort((a, b) => b.score - a.score).slice(0, 4);
+      return { responses, dimensionRows, global, enps, high, low };
+    }
+
+    function distribution(rows, key) {
+      const out = {};
+      rows.forEach(r => {
+        const k = r[key] || "N/D";
+        out[k] = (out[k] || 0) + 1;
+      });
+      return Object.entries(out).sort((a, b) => b[1] - a[1]);
+    }
+
+    function setView(view) {
+      document.querySelectorAll(".view").forEach(el => el.classList.add("hide"));
+      document.getElementById("view-" + view).classList.remove("hide");
+      document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+      render(view);
+    }
+
+    document.getElementById("tabs").addEventListener("click", e => {
+      const btn = e.target.closest("button[data-view]");
+      if (btn) setView(btn.dataset.view);
+    });
+
+    function render(view = "setup") {
+      if (location.hash.startsWith("#survey/")) return renderSurvey(location.hash.split("/")[1]);
+      const c = activeCompany();
+      if (!c) return;
+      if (view === "setup") renderSetup(c);
+      if (view === "questionnaire") renderQuestionnaire(c);
+      if (view === "responses") renderResponses(c);
+      if (view === "analytics") renderAnalytics(c);
+      if (view === "report") renderReport(c);
+      if (view === "method") renderMethod();
+    }
+
+    function renderSetup(c) {
+      const el = document.getElementById("view-setup");
+      el.innerHTML = `
+        <div class="grid cols-4">
+          <div class="panel">
+            <h2>Empresa ativa</h2>
+            <label>Selecionar cliente</label>
+            <select id="companySelect">${state.companies.map(x => `<option value="${x.id}" ${x.id === c.id ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select>
+            <div class="toolbar">
+              <button class="primary" id="newCompany">Nova empresa</button>
+              <button id="exportAll">Exportar base</button>
+              <label class="btn" for="importAll">Importar base</label>
+              <input id="importAll" type="file" accept="application/json" class="hide">
+            </div>
+            <p class="small muted">Os dados ficam guardados no navegador deste computador. Para arquivo ou passagem entre computadores, exportar/importar a base JSON.</p>
+          </div>
+          <div class="panel">
+            <h2>Configuração</h2>
+            <div class="field-row">
+              <div><label>Nome da empresa</label><input id="companyName" value="${esc(c.name)}"></div>
+              <div><label>Setor</label><input id="companySector" value="${esc(c.sector || "")}"></div>
+              <div><label>Nº esperado de respostas/colaboradores</label><input id="companyExpected" type="number" min="0" value="${esc(c.expected || 0)}"></div>
+              <div><label>Localizações</label><input id="companyLocations" value="${esc((c.locations || []).join(", "))}"></div>
+            </div>
+            <label style="margin-top:10px">Áreas profissionais</label>
+            <textarea id="companyAreas">${esc((c.areas || []).join("\\n"))}</textarea>
+            <label>Departamentos</label>
+            <textarea id="companyDepartments">${esc((c.departments || []).join("\\n"))}</textarea>
+            <button class="teal" id="saveCompany">Guardar configuração</button>
+          </div>
+          <div class="panel">
+            <h2>Link de resposta</h2>
+            <p class="muted">Use este link quando o questionário for respondido no mesmo ambiente/navegador. Para recolha externa multiutilizador, use Microsoft Forms/Google Forms e importe o CSV.</p>
+            <input readonly id="surveyLink" value="${esc(surveyUrl(c))}">
+            <div class="toolbar">
+              <button id="copyLink">Copiar link</button>
+              <button id="openSurvey">Abrir questionário</button>
+            </div>
+            <p class="small muted">Recomendação para clientes: criar formulário anónimo em Forms com as perguntas da aba Questionário, exportar CSV e importar aqui.</p>
+          </div>
+          <div class="panel">
+            <h2>Supabase</h2>
+            <p class="muted">Ative para recolha remota real, painel multiempresa e respostas centralizadas.</p>
+            <label><input id="supaEnabled" type="checkbox" style="width:auto" ${supaConfig.enabled ? "checked" : ""}> Usar Supabase</label>
+            <label>Project URL</label>
+            <input id="supaUrl" value="${esc(supaConfig.url || "")}" placeholder="https://xxxxx.supabase.co">
+            <label>Anon public key</label>
+            <input id="supaAnon" value="${esc(supaConfig.anonKey || "")}" placeholder="eyJhbGciOi...">
+            <div class="field-row">
+              <div><label>Email consultora</label><input id="supaEmail" type="email" placeholder="email@empresa.pt"></div>
+              <div><label>Password</label><input id="supaPassword" type="password"></div>
+            </div>
+            <div class="toolbar">
+              <button id="saveSupa">Guardar</button>
+              <button class="teal" id="loginSupa">Login</button>
+              <button id="syncSupa">Sincronizar</button>
+            </div>
+            <p class="small muted" id="supaStatus">${supaConfig.enabled ? "Configuração guardada. Faça login e sincronize." : "Modo local ativo."}</p>
+          </div>
+        </div>
+      `;
+      document.getElementById("companySelect").onchange = e => { activeCompanyId = e.target.value; saveState(); renderSetup(activeCompany()); };
+      document.getElementById("newCompany").onclick = () => {
+        const comp = defaultCompany();
+        comp.name = "Novo Cliente";
+        comp.responses = [];
+        state.companies.push(comp); activeCompanyId = comp.id; saveState(); renderSetup(comp);
+      };
+      document.getElementById("saveCompany").onclick = () => {
+        c.name = document.getElementById("companyName").value.trim() || c.name;
+        c.sector = document.getElementById("companySector").value.trim();
+        c.expected = Number(document.getElementById("companyExpected").value) || 0;
+        c.locations = splitLines(document.getElementById("companyLocations").value.replaceAll(",", "\n"));
+        c.areas = splitLines(document.getElementById("companyAreas").value);
+        c.departments = splitLines(document.getElementById("companyDepartments").value);
+        saveState(); renderSetup(c);
+      };
+      document.getElementById("copyLink").onclick = () => navigator.clipboard?.writeText(document.getElementById("surveyLink").value);
+      document.getElementById("openSurvey").onclick = () => { location.href = surveyUrl(c); };
+      document.getElementById("exportAll").onclick = () => download("clima-organizacional-base.json", JSON.stringify(state, null, 2), "application/json");
+      document.getElementById("importAll").onchange = importBase;
+      document.getElementById("saveSupa").onclick = () => {
+        supaConfig.enabled = document.getElementById("supaEnabled").checked;
+        supaConfig.url = document.getElementById("supaUrl").value.trim();
+        supaConfig.anonKey = document.getElementById("supaAnon").value.trim();
+        supa = null;
+        saveSupabaseConfig();
+        document.getElementById("supaStatus").textContent = "Configuração Supabase guardada.";
+      };
+      document.getElementById("loginSupa").onclick = async () => {
+        document.getElementById("saveSupa").click();
+        const client = getSupabase();
+        if (!client) return alert("Configure URL e anon key do Supabase.");
+        const email = document.getElementById("supaEmail").value.trim();
+        const password = document.getElementById("supaPassword").value;
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) return alert("Erro de login: " + error.message);
+        supaUser = data.user;
+        document.getElementById("supaStatus").textContent = "Login efetuado: " + supaUser.email;
+      };
+      document.getElementById("syncSupa").onclick = async () => {
+        document.getElementById("saveSupa").click();
+        try {
+          await syncActiveCompanyToSupabase(c);
+          await loadSupabaseCompanies();
+          document.getElementById("supaStatus").textContent = "Sincronização concluída.";
+          renderSetup(activeCompany());
+        } catch (err) {
+          alert("Erro Supabase: " + err.message);
+        }
+      };
+    }
+
+    function splitLines(txt) {
+      return txt.split(/\n|;/).map(x => x.trim()).filter(Boolean);
+    }
+
+    function renderQuestionnaire(c) {
+      const qs = allQuestions();
+      document.getElementById("view-questionnaire").innerHTML = `
+        <div class="panel">
+          <h2>Questionário-mestre</h2>
+          <p class="muted">Modelo baseado no questionário de clima interno e no material Sinmetro de indicadores RH: 12 dimensões, 48 itens Likert, eNPS e 3 perguntas abertas.</p>
+          <div class="toolbar">
+            <button id="exportQuestionnaire">Exportar perguntas CSV</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Dimensão</th><th>Pergunta</th><th>Escala</th></tr></thead>
+            <tbody>${qs.map(q => `<tr><td>${q.id}</td><td>${esc(q.dimension)}</td><td>${esc(q.text)}</td><td>1-5</td></tr>`).join("")}
+            <tr><td>ENPS</td><td>Engagement</td><td>Probabilidade de recomendar a organização como local para trabalhar.</td><td>0-10</td></tr>
+            <tr><td>AB1-AB3</td><td>Qualitativo</td><td>Pontos fortes, mudanças urgentes e sugestões.</td><td>Texto</td></tr></tbody>
+          </table>
+        </div>
+      `;
+      document.getElementById("exportQuestionnaire").onclick = () => {
+        const rows = [["ID","Dimensão","Pergunta","Escala"], ...qs.map(q => [q.id, q.dimension, q.text, "1-5"]), ["ENPS","Engagement","Probabilidade de recomendar","0-10"], ["AB1","Qualitativo","O que mais valoriza atualmente?","Texto"], ["AB2","Qualitativo","O que deveria mudar com maior urgência?","Texto"], ["AB3","Qualitativo","Que sugestão deixaria à gestão?","Texto"]];
+        download("questionario-clima.csv", toCsv(rows), "text/csv;charset=utf-8");
+      };
+    }
+
+    function renderResponses(c) {
+      const rows = c.responses || [];
+      document.getElementById("view-responses").innerHTML = `
+        <div class="grid cols-2">
+          <div class="panel">
+            <h2>Recolha e importação</h2>
+            <p class="muted">Importe CSV exportado de Microsoft Forms/Google Forms. O sistema tenta mapear cabeçalhos por ID (Q01, Q02...) ou por texto da pergunta.</p>
+            <div class="toolbar">
+              <label class="btn primary" for="csvImport">Importar CSV de respostas</label>
+              <input id="csvImport" type="file" accept=".csv,text/csv" class="hide">
+              <button id="exportResponses">Exportar respostas CSV</button>
+              <button class="danger" id="clearResponses">Limpar respostas</button>
+            </div>
+            <p class="small muted">Para preservar anonimato: não importar colunas com nome, email, telefone ou número interno. Se existirem no CSV, serão ignoradas.</p>
+          </div>
+          <div class="panel">
+            <h2>Resumo da recolha</h2>
+            <div class="grid cols-3">
+              <div class="kpi"><span class="muted">Respostas</span><div class="value">${rows.length}</div></div>
+              <div class="kpi"><span class="muted">Esperado</span><div class="value">${c.expected || 0}</div></div>
+              <div class="kpi"><span class="muted">Taxa</span><div class="value">${c.expected ? fmt(rows.length / c.expected * 100, 0) + "%" : "N/D"}</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h2>Últimas respostas</h2>
+          ${rows.length ? `<table><thead><tr><th>Data</th><th>Género</th><th>Faixa etária</th><th>Área</th><th>Tempo de serviço</th><th>eNPS</th></tr></thead><tbody>${rows.slice(-20).reverse().map(r => `<tr><td>${esc((r.date || "").slice(0,16).replace("T"," "))}</td><td>${esc(r.gender)}</td><td>${esc(r.age)}</td><td>${esc(r.area)}</td><td>${esc(r.tenure)}</td><td>${esc(r.enps)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">Ainda não há respostas nesta empresa.</div>`}
+        </div>
+      `;
+      document.getElementById("csvImport").onchange = e => importCsvResponses(e, c);
+      document.getElementById("exportResponses").onclick = () => download(`${slug(c.name)}-respostas.csv`, exportResponsesCsv(c), "text/csv;charset=utf-8");
+      document.getElementById("clearResponses").onclick = () => {
+        if (confirm("Limpar todas as respostas desta empresa?")) {
+          if (supaConfig.enabled && c.remoteSurveyId && getSupabase()) getSupabase().from("clima_responses").delete().eq("survey_id", c.remoteSurveyId);
+          c.responses = []; saveState(); renderResponses(c);
+        }
+      };
+    }
+
+    function renderAnalytics(c) {
+      const a = compute(c);
+      const rows = a.responses;
+      const panel = document.getElementById("view-analytics");
+      panel.innerHTML = `
+        <div class="grid cols-4">
+          <div class="kpi"><span class="muted">Respostas válidas</span><div class="value">${rows.length}</div></div>
+          <div class="kpi"><span class="muted">Participação</span><div class="value">${c.expected ? fmt(rows.length / c.expected * 100, 0) + "%" : "N/D"}</div></div>
+          <div class="kpi"><span class="muted">Média global</span><div class="value">${fmt(a.global)}</div></div>
+          <div class="kpi"><span class="muted">eNPS</span><div class="value">${a.enps}</div></div>
+        </div>
+        <div class="grid cols-2" style="margin-top:16px">
+          <div class="panel">
+            <h2>Resultados por dimensão</h2>
+            <canvas id="dimChart" width="900" height="360"></canvas>
+            <table style="margin-top:12px">
+              <thead><tr><th>Dimensão</th><th>Média</th><th>Estado</th><th>Distribuição</th></tr></thead>
+              <tbody>${a.dimensionRows.map(d => `<tr><td>${esc(d.name)}</td><td><strong>${fmt(d.score)}</strong></td><td><span class="tag ${d.cls}">${d.label}</span></td><td><div class="barline"><div class="fill ${d.cls}" style="width:${Math.max(0, Math.min(100, d.score/5*100))}%"></div></div></td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <h2>Caracterização das respostas</h2>
+            ${distBlock("Género", distribution(rows, "gender"))}
+            ${distBlock("Faixa etária", distribution(rows, "age"))}
+            ${distBlock("Área profissional", distribution(rows, "area"))}
+            ${distBlock("Tempo de serviço", distribution(rows, "tenure"))}
+          </div>
+        </div>
+      `;
+      drawBarChart(document.getElementById("dimChart"), a.dimensionRows.map(d => d.name), a.dimensionRows.map(d => d.score));
+    }
+
+    function distBlock(title, rows) {
+      const total = rows.reduce((a, b) => a + b[1], 0) || 1;
+      return `<h3 style="margin-top:14px">${esc(title)}</h3><table><tbody>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td style="width:55px">${v}</td><td><div class="barline"><div class="fill" style="width:${v/total*100}%"></div></div></td></tr>`).join("")}</tbody></table>`;
+    }
+
+    function renderReport(c) {
+      const a = compute(c);
+      const rows = a.responses;
+      const criticalText = makeCriticalAnalysis(a);
+      const actions = makeActions(a);
+      document.getElementById("view-report").innerHTML = `
+        <div class="toolbar no-print">
+          <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+          <button id="exportReportHtml">Exportar relatório HTML</button>
+        </div>
+        <article class="report" id="clientReport">
+          <h1>Relatório de Clima Organizacional</h1>
+          <p class="muted"><strong>Cliente:</strong> ${esc(c.name)} | <strong>Setor:</strong> ${esc(c.sector || "N/D")} | <strong>Data:</strong> ${new Date().toLocaleDateString("pt-PT")}</p>
+          <h2>1. Sumário executivo</h2>
+          <p>O estudo recolheu <strong>${rows.length}</strong> respostas. ${c.expected ? `Considerando ${c.expected} respostas/colaboradores esperados, a taxa de participação foi de <strong>${fmt(rows.length / c.expected * 100, 0)}%</strong>.` : ""} A média global de clima foi <strong>${fmt(a.global)}</strong> numa escala de 1 a 5, e o eNPS foi <strong>${a.enps}</strong>.</p>
+          <p>As dimensões mais fortes foram ${listNames(a.high.slice(0,3))}. As dimensões que exigem maior atenção são ${listNames(a.low.slice(0,3))}.</p>
+          <h2>2. Caracterização da amostra</h2>
+          <div class="grid cols-2">
+            <div>${distBlock("Distribuição por género", distribution(rows, "gender"))}</div>
+            <div>${distBlock("Distribuição por faixa etária", distribution(rows, "age"))}</div>
+            <div>${distBlock("Distribuição por área profissional", distribution(rows, "area"))}</div>
+            <div>${distBlock("Distribuição por tempo de serviço", distribution(rows, "tenure"))}</div>
+          </div>
+          <h2>3. Resultados gerais por dimensão</h2>
+          <table><thead><tr><th>Dimensão</th><th>Média</th><th>Leitura</th><th>Interpretação</th></tr></thead><tbody>
+            ${a.dimensionRows.map(d => `<tr><td>${esc(d.name)}</td><td>${fmt(d.score)}</td><td><span class="tag ${d.cls}">${d.label}</span></td><td>${esc(d.action)}</td></tr>`).join("")}
+          </tbody></table>
+          <h2>4. Análise crítica dos resultados</h2>
+          ${criticalText.map(p => `<p>${esc(p)}</p>`).join("")}
+          <h2>5. Principais dados obtidos</h2>
+          <ul>
+            <li>Dimensão com pontuação mais elevada: <strong>${esc(a.high[0]?.name || "N/D")}</strong> (${fmt(a.high[0]?.score || 0)}).</li>
+            <li>Dimensão com pontuação mais baixa: <strong>${esc(a.low[0]?.name || "N/D")}</strong> (${fmt(a.low[0]?.score || 0)}).</li>
+            <li>Dimensões abaixo de 3,3: <strong>${a.dimensionRows.filter(d => d.score < 3.3).length}</strong>.</li>
+            <li>Comentários abertos recolhidos: <strong>${rows.filter(r => r.open1 || r.open2 || r.open3).length}</strong>.</li>
+          </ul>
+          <h2>6. Plano de ações</h2>
+          ${["Curto prazo", "Médio prazo", "Longo prazo"].map(h => `<h3>${h}</h3><table><thead><tr><th>Ação</th><th>Necessidade/lacuna</th><th>Indicador</th></tr></thead><tbody>${actions.filter(x => x.term === h).map(x => `<tr><td>${esc(x.action)}</td><td>${esc(x.need)}</td><td>${esc(x.metric)}</td></tr>`).join("")}</tbody></table>`).join("")}
+          <h2>7. Nota metodológica e proteção de dados</h2>
+          <p>O questionário deve ser aplicado de forma anónima, sem recolha de nome, email, telefone, IP ou identificador interno. A análise por segmento deve ser apresentada apenas quando existirem pelo menos 5 respostas no grupo, evitando identificação indireta.</p>
+        </article>
+      `;
+      document.getElementById("exportReportHtml").onclick = () => {
+        const html = "<!doctype html><meta charset='utf-8'><title>Relatório de Clima</title>" + document.querySelector("style").outerHTML + document.getElementById("clientReport").outerHTML;
+        download(`${slug(c.name)}-relatorio-clima.html`, html, "text/html;charset=utf-8");
+      };
+    }
+
+    function listNames(rows) {
+      return rows.map(d => `${d.name} (${fmt(d.score)})`).join(", ") || "N/D";
+    }
+
+    function makeCriticalAnalysis(a) {
+      const out = [];
+      if (!a.responses.length) return ["Ainda não existem respostas suficientes para análise crítica."];
+      out.push(`A média global de ${fmt(a.global)} indica ${classify(a.global).label.toLowerCase()}. Esta leitura deve ser cruzada com a distribuição por dimensão, porque uma média global aceitável pode esconder riscos específicos em comunicação, liderança, equidade ou bem-estar.`);
+      const low = a.low[0];
+      if (low) out.push(`A principal zona de vulnerabilidade é "${low.name}", com média ${fmt(low.score)}. Esta dimensão deve ser tratada como prioridade de gestão, porque tende a influenciar motivação, confiança e retenção.`);
+      const communication = a.dimensionRows.find(d => d.id === "D06");
+      const leadership = a.dimensionRows.find(d => d.id === "D04");
+      const wellbeing = a.dimensionRows.find(d => d.id === "D11");
+      if (communication?.score < 3.5) out.push("A comunicação apresenta sinais de fragilidade. Em estudos de clima, falhas de informação e alinhamento costumam amplificar perceções negativas sobre liderança, justiça interna e capacidade de execução.");
+      if (leadership?.score < 3.5) out.push("A liderança deve ser olhada como alavanca de melhoria. Mesmo quando existem bons indicadores técnicos, a falta de feedback, presença e apoio da chefia reduz envolvimento e clareza de prioridades.");
+      if (wellbeing?.score < 3.5) out.push("A dimensão de saúde, segurança e bem-estar sugere necessidade de intervenção sobre carga de trabalho, equilíbrio e condições de trabalho, prevenindo absentismo, fadiga e perda de engagement.");
+      if (a.enps < 0) out.push("O eNPS negativo indica maior peso de detratores do que promotores. Este indicador exige resposta visível da gestão e compromisso com ações de melhoria mensuráveis.");
+      else if (a.enps < 30) out.push("O eNPS é moderado e deve ser acompanhado. Há margem para converter colaboradores neutros em promotores através de ações concretas nas dimensões mais frágeis.");
+      else out.push("O eNPS é positivo, sugerindo uma base favorável de recomendação interna. A prioridade deve ser consolidar pontos fortes e agir nos focos de risco para manter confiança.");
+      return out;
+    }
+
+    function makeActions(a) {
+      const weak = a.dimensionRows.filter(d => d.score < 3.5).sort((x, y) => x.score - y.score);
+      const need = weak.length ? weak.map(d => d.name).join("; ") : "Manutenção e melhoria contínua";
+      const actions = [
+        { term: "Curto prazo", action: "Comunicar resultados agregados e assumir 3 compromissos de melhoria.", need, metric: "Sessão realizada e compromissos publicados em 15 dias." },
+        { term: "Curto prazo", action: "Fazer sessões rápidas de escuta com equipas/grupos críticos, preservando anonimato.", need: weak[0]?.name || "Validação qualitativa", metric: "Sessões realizadas; temas priorizados." },
+        { term: "Curto prazo", action: "Clarificar regras de assiduidade, flexibilidade, prioridades e canais de decisão.", need: "Gestão do tempo, comunicação e equidade.", metric: "FAQ/política publicada; dúvidas reduzidas." },
+        { term: "Médio prazo", action: "Implementar rotina mensal de feedback entre chefias e equipas.", need: "Liderança, comunicação e alinhamento.", metric: "% equipas com reunião mensal documentada." },
+        { term: "Médio prazo", action: "Rever processos, ferramentas e recursos que bloqueiam o trabalho diário.", need: "Recursos, processos e condições de trabalho.", metric: "Nº de melhorias implementadas; tempo de resposta." },
+        { term: "Médio prazo", action: "Criar plano de formação/desenvolvimento por área profissional.", need: "Formação, carreira e desenvolvimento.", metric: "% execução do plano; satisfação com formação." },
+        { term: "Longo prazo", action: "Integrar clima, eNPS, absentismo, rotatividade, pontualidade e performance num ciclo anual de RH.", need: "Governo contínuo de pessoas.", metric: "Dashboard anual e revisão trimestral." },
+        { term: "Longo prazo", action: "Criar ou rever política de carreira, reconhecimento e equidade remuneratória.", need: "Carreira, remuneração e justiça interna.", metric: "Política aprovada; indicadores de progressão." },
+        { term: "Longo prazo", action: "Repetir estudo anualmente e aplicar pulse surveys trimestrais nas dimensões críticas.", need: "Monitorização da evolução.", metric: "Variação por dimensão face à linha de base." }
+      ];
+      return actions;
+    }
+
+    function renderMethod() {
+      document.getElementById("view-method").innerHTML = `
+        <div class="grid cols-2">
+          <div class="panel">
+            <h2>Boas práticas incorporadas</h2>
+            <ul class="source-list">
+              <li>Perguntas simples, uma ideia por pergunta, sem dupla negação e com ordem lógica.</li>
+              <li>Escala consistente de 1 a 5 para permitir comparação entre dimensões e ao longo do tempo.</li>
+              <li>Consentimento/informação antes da resposta: finalidade, voluntariedade, anonimato e uso agregado dos dados.</li>
+              <li>Minimização: não recolher identificadores diretos; limitar demografia para evitar identificação indireta.</li>
+              <li>Regra de reporte por segmento apenas com n >= 5.</li>
+              <li>Retenção definida por cliente e exportação/arquivo controlado da base.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Fontes consultadas</h2>
+            <ul class="source-list">${SOURCES.map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.name)}</a><br><span class="muted small">${esc(s.use)}</span></li>`).join("")}</ul>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h2>Arquitetura recomendada para escala</h2>
+          <table><thead><tr><th>Nível</th><th>Como usar</th><th>Segurança</th><th>Intervenção humana</th></tr></thead><tbody>
+            <tr><td>Sem backend</td><td>Este HTML + importação CSV de Forms.</td><td>Dados locais no computador da consultora.</td><td>Baixa: exportar CSV e importar.</td></tr>
+            <tr><td>Microsoft 365</td><td>Forms anónimo + Excel/SharePoint + este HTML para relatório.</td><td>Permissões por cliente, MFA, retenção definida.</td><td>Muito baixa.</td></tr>
+            <tr><td>Plataforma própria</td><td>HTML ligado a base de dados e autenticação por cliente.</td><td>Backend, logs, encriptação, DPA, gestão de consentimento.</td><td>Automática após implementação técnica.</td></tr>
+          </tbody></table>
+        </div>
+      `;
+    }
+
+    function renderSurvey(companyId) {
+      const c = state.companies.find(x => x.id === companyId);
+      document.getElementById("adminViews").classList.add("hide");
+      document.getElementById("tabs").classList.add("hide");
+      const el = document.getElementById("surveyView");
+      el.classList.remove("hide");
+      if (!c) {
+        el.innerHTML = `<div class="empty">Empresa não encontrada.</div>`;
+        return;
+      }
+      let qn = 1;
+      el.innerHTML = `
+        <div class="panel">
+          <h2>Questionário de Clima Organizacional</h2>
+          <p class="muted"><strong>${esc(c.name)}</strong> | Resposta anónima e analisada apenas de forma agregada.</p>
+          <p>Ao continuar, confirma que compreende a finalidade do estudo, que a participação é voluntária e que não deve introduzir dados que o identifiquem nas respostas abertas.</p>
+        </div>
+        <form id="surveyForm" class="panel" style="margin-top:16px">
+          <h2>Caracterização</h2>
+          <div class="grid cols-3">
+            ${selectField("gender","Género",["Mulher","Homem","Outro / não binário","Prefiro não responder"])}
+            ${selectField("age","Faixa etária",["18-25","26-35","36-45","46-55",">55","Prefiro não responder"])}
+            ${selectField("area","Área profissional",c.areas || [])}
+            ${selectField("department","Departamento",c.departments || [])}
+            ${selectField("location","Localização",c.locations || [])}
+            ${selectField("tenure","Tempo de serviço",["<1 ano","1-2 anos","3-6 anos","7-15 anos",">15 anos","Prefiro não responder"])}
+            ${selectField("workMode","Regime",["Presencial","Híbrido","Remoto","Turnos/outro"])}
+          </div>
+          ${DIMENSIONS.map(d => `<div class="dimension-title">${esc(d.name)}</div>${d.questions.map(q => questionHtml(qid(qn++), q)).join("")}`).join("")}
+          <div class="dimension-title">eNPS e comentários</div>
+          <label>Numa escala de 0 a 10, qual a probabilidade de recomendar esta organização como local para trabalhar?</label>
+          <input name="enps" type="number" min="0" max="10" required>
+          <label style="margin-top:12px">O que mais valoriza atualmente na organização?</label><textarea name="open1"></textarea>
+          <label>O que deveria mudar com maior urgência?</label><textarea name="open2"></textarea>
+          <label>Que sugestão deixaria à gestão para melhorar o clima?</label><textarea name="open3"></textarea>
+          <div class="toolbar"><button class="primary" type="submit">Submeter resposta</button><button type="button" id="backAdmin">Voltar</button></div>
+        </form>
+      `;
+      document.getElementById("backAdmin").onclick = () => { location.hash = ""; location.reload(); };
+      document.getElementById("surveyForm").onsubmit = e => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const answers = {};
+        allQuestions().forEach(q => answers[q.id] = Number(fd.get(q.id)));
+        c.responses.push({
+          id: "R" + Date.now(),
+          date: new Date().toISOString(),
+          consent: true,
+          gender: fd.get("gender"),
+          age: fd.get("age"),
+          area: fd.get("area"),
+          department: fd.get("department"),
+          location: fd.get("location"),
+          tenure: fd.get("tenure"),
+          workMode: fd.get("workMode"),
+          enps: Number(fd.get("enps")),
+          open1: fd.get("open1"),
+          open2: fd.get("open2"),
+          open3: fd.get("open3"),
+          answers
+        });
+        saveState();
+        el.innerHTML = `<div class="panel"><h2>Obrigado pela sua resposta.</h2><p>A resposta foi registada de forma anónima neste sistema.</p></div>`;
+      };
+    }
+
+    async function renderSurveyFromSupabase(token) {
+      document.getElementById("adminViews").classList.add("hide");
+      document.getElementById("tabs").classList.add("hide");
+      const el = document.getElementById("surveyView");
+      el.classList.remove("hide");
+      const client = getSupabase();
+      if (!client) {
+        el.innerHTML = `<div class="empty">Este link usa Supabase. Configure a URL e a anon key neste navegador antes de abrir o questionário.</div>`;
+        return;
+      }
+      const { data: survey, error } = await client
+        .from("clima_surveys")
+        .select("id,title,public_token,is_open")
+        .eq("public_token", token)
+        .eq("is_open", true)
+        .single();
+      if (error || !survey) {
+        el.innerHTML = `<div class="empty">Questionário não encontrado ou encerrado.</div>`;
+        return;
+      }
+      const c = {
+        id: survey.id,
+        name: survey.title.replace("Estudo de Clima Organizacional - ", ""),
+        areas: ["Gestão/Administração", "Técnica/Operacional", "Comercial", "Suporte", "Consultoria", "Design/Produto", "Outro"],
+        departments: ["Administração", "Operações", "Comercial", "Suporte", "Tecnologia", "Outro"],
+        locations: ["Sede", "Unidade/Delegação", "Remoto/Híbrido", "Outro"]
+      };
+      renderSurveyShell(c, async (response) => {
+        const payload = toSupabaseResponse(response, survey.id, survey.public_token);
+        const { error: insertError } = await client.from("clima_responses").insert(payload);
+        if (insertError) throw insertError;
+      });
+    }
+
+    function renderSurveyShell(c, onSubmit) {
+      document.getElementById("adminViews").classList.add("hide");
+      document.getElementById("tabs").classList.add("hide");
+      const el = document.getElementById("surveyView");
+      el.classList.remove("hide");
+      let qn = 1;
+      el.innerHTML = `
+        <div class="panel">
+          <h2>Questionário de Clima Organizacional</h2>
+          <p class="muted"><strong>${esc(c.name)}</strong> | Resposta anónima e analisada apenas de forma agregada.</p>
+          <p>Ao continuar, confirma que compreende a finalidade do estudo, que a participação é voluntária e que não deve introduzir dados que o identifiquem nas respostas abertas.</p>
+        </div>
+        <form id="surveyForm" class="panel" style="margin-top:16px">
+          <h2>Caracterização</h2>
+          <div class="grid cols-3">
+            ${selectField("gender","Género",["Mulher","Homem","Outro / não binário","Prefiro não responder"])}
+            ${selectField("age","Faixa etária",["18-25","26-35","36-45","46-55",">55","Prefiro não responder"])}
+            ${selectField("area","Área profissional",c.areas || [])}
+            ${selectField("department","Departamento",c.departments || [])}
+            ${selectField("location","Localização",c.locations || [])}
+            ${selectField("tenure","Tempo de serviço",["<1 ano","1-2 anos","3-6 anos","7-15 anos",">15 anos","Prefiro não responder"])}
+            ${selectField("workMode","Regime",["Presencial","Híbrido","Remoto","Turnos/outro"])}
+          </div>
+          ${DIMENSIONS.map(d => `<div class="dimension-title">${esc(d.name)}</div>${d.questions.map(q => questionHtml(qid(qn++), q)).join("")}`).join("")}
+          <div class="dimension-title">eNPS e comentários</div>
+          <label>Numa escala de 0 a 10, qual a probabilidade de recomendar esta organização como local para trabalhar?</label>
+          <input name="enps" type="number" min="0" max="10" required>
+          <label style="margin-top:12px">O que mais valoriza atualmente na organização?</label><textarea name="open1"></textarea>
+          <label>O que deveria mudar com maior urgência?</label><textarea name="open2"></textarea>
+          <label>Que sugestão deixaria à gestão para melhorar o clima?</label><textarea name="open3"></textarea>
+          <div class="toolbar"><button class="primary" type="submit">Submeter resposta</button><button type="button" id="backAdmin">Voltar</button></div>
+        </form>
+      `;
+      document.getElementById("backAdmin").onclick = () => { location.hash = ""; location.reload(); };
+      document.getElementById("surveyForm").onsubmit = async e => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const answers = {};
+        allQuestions().forEach(q => answers[q.id] = Number(fd.get(q.id)));
+        const response = {
+          id: "R" + Date.now(),
+          date: new Date().toISOString(),
+          consent: true,
+          gender: fd.get("gender"),
+          age: fd.get("age"),
+          area: fd.get("area"),
+          department: fd.get("department"),
+          location: fd.get("location"),
+          tenure: fd.get("tenure"),
+          workMode: fd.get("workMode"),
+          enps: Number(fd.get("enps")),
+          open1: fd.get("open1"),
+          open2: fd.get("open2"),
+          open3: fd.get("open3"),
+          answers
+        };
+        try {
+          await onSubmit(response);
+          el.innerHTML = `<div class="panel"><h2>Obrigado pela sua resposta.</h2><p>A resposta foi registada de forma anónima.</p></div>`;
+        } catch (err) {
+          alert("Não foi possível submeter a resposta: " + err.message);
+        }
+      };
+    }
+
+    function selectField(name, label, options) {
+      return `<div><label>${esc(label)}</label><select name="${name}" required><option value="">Selecionar</option>${options.map(o => `<option>${esc(o)}</option>`).join("")}</select></div>`;
+    }
+
+    function questionHtml(id, text) {
+      return `<div class="question"><div><strong>${id}.</strong> ${esc(text)}</div><div class="scale">${[1,2,3,4,5].map(v => `<label><input type="radio" name="${id}" value="${v}" required>${v}</label>`).join("")}</div></div>`;
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], cell = "", quote = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], next = text[i + 1];
+        if (ch === '"' && quote && next === '"') { cell += '"'; i++; }
+        else if (ch === '"') quote = !quote;
+        else if (ch === "," && !quote) { row.push(cell); cell = ""; }
+        else if ((ch === "\n" || ch === "\r") && !quote) {
+          if (cell || row.length) { row.push(cell); rows.push(row); row = []; cell = ""; }
+          if (ch === "\r" && next === "\n") i++;
+        } else cell += ch;
+      }
+      if (cell || row.length) { row.push(cell); rows.push(row); }
+      return rows;
+    }
+
+    function normalize(s) {
+      return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
+    function importCsvResponses(event, c) {
+      const file = event.target.files[0]; if (!file) return;
+      file.text().then(text => {
+        const rows = parseCsv(text);
+        if (rows.length < 2) return alert("CSV sem respostas.");
+        const headers = rows[0].map(h => h.trim());
+        const qs = allQuestions();
+        const find = names => headers.findIndex(h => names.some(n => normalize(h).includes(normalize(n))));
+        const idx = {
+          date: find(["timestamp","carimbo","data","hora"]),
+          gender: find(["genero","género","sexo"]),
+          age: find(["faixa etaria","idade"]),
+          area: find(["area profissional","profissao","função","funcao"]),
+          department: find(["departamento","area funcional"]),
+          location: find(["localizacao","localização","unidade"]),
+          tenure: find(["tempo de servico","antiguidade"]),
+          workMode: find(["regime"]),
+          enps: find(["enps","probabilidade de recomendar","recomendar esta organizacao"])
+        };
+        const qIndex = {};
+        qs.forEach(q => {
+          qIndex[q.id] = headers.findIndex(h => normalize(h) === normalize(q.id) || normalize(h).includes(normalize(q.text).slice(0, 45)));
+        });
+        const imported = rows.slice(1).filter(r => r.some(Boolean)).map((r, i) => {
+          const answers = {};
+          qs.forEach(q => answers[q.id] = Number(r[qIndex[q.id]] || ""));
+          return {
+            id: "CSV" + Date.now() + "-" + i,
+            date: idx.date >= 0 ? r[idx.date] : new Date().toISOString(),
+            consent: true,
+            gender: idx.gender >= 0 ? r[idx.gender] : "N/D",
+            age: idx.age >= 0 ? r[idx.age] : "N/D",
+            area: idx.area >= 0 ? r[idx.area] : "N/D",
+            department: idx.department >= 0 ? r[idx.department] : "N/D",
+            location: idx.location >= 0 ? r[idx.location] : "N/D",
+            tenure: idx.tenure >= 0 ? r[idx.tenure] : "N/D",
+            workMode: idx.workMode >= 0 ? r[idx.workMode] : "N/D",
+            enps: idx.enps >= 0 ? Number(r[idx.enps]) : "",
+            open1: r[find(["mais valoriza"])] || "",
+            open2: r[find(["mudar com maior urgencia"])] || "",
+            open3: r[find(["sugestao","sugestão"])] || "",
+            answers
+          };
+        });
+        c.responses.push(...imported);
+        if (supaConfig.enabled && c.remoteSurveyId && c.publicToken && getSupabase()) {
+          getSupabase().from("clima_responses").insert(imported.map(r => toSupabaseResponse(r, c.remoteSurveyId, c.publicToken)));
+        }
+        saveState();
+        alert(`${imported.length} respostas importadas.`);
+        renderResponses(c);
+      });
+    }
+
+    function exportResponsesCsv(c) {
+      const qs = allQuestions();
+      const header = ["Data","Género","Faixa etária","Área profissional","Departamento","Localização","Tempo de serviço","Regime","ENPS",...qs.map(q => q.id),"AB1","AB2","AB3"];
+      const rows = (c.responses || []).map(r => [r.date,r.gender,r.age,r.area,r.department,r.location,r.tenure,r.workMode,r.enps,...qs.map(q => r.answers?.[q.id] ?? ""),r.open1,r.open2,r.open3]);
+      return toCsv([header, ...rows]);
+    }
+
+    function toCsv(rows) {
+      return rows.map(row => row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",")).join("\n");
+    }
+
+    function importBase(e) {
+      const file = e.target.files[0]; if (!file) return;
+      file.text().then(text => {
+        const data = JSON.parse(text);
+        if (!Array.isArray(data.companies)) throw new Error("Formato inválido");
+        state.companies = data.companies;
+        activeCompanyId = data.activeCompanyId || state.companies[0]?.id;
+        saveState(); renderSetup(activeCompany());
+      }).catch(err => alert("Erro ao importar base: " + err.message));
+    }
+
+    async function syncActiveCompanyToSupabase(c) {
+      const client = getSupabase();
+      if (!client) throw new Error("Supabase não configurado.");
+      const user = await refreshSupabaseUser();
+      if (!user) throw new Error("Faça login antes de sincronizar.");
+
+      const clientPayload = {
+        name: c.name,
+        sector: c.sector || "",
+        expected_responses: Number(c.expected) || 0,
+        departments: c.departments || [],
+        areas: c.areas || [],
+        locations: c.locations || []
+      };
+      let clientRow;
+      if (c.remoteClientId) {
+        const { data, error } = await client.from("clima_clients").update(clientPayload).eq("id", c.remoteClientId).select().single();
+        if (error) throw error;
+        clientRow = data;
+      } else {
+        const { data, error } = await client.from("clima_clients").insert(clientPayload).select().single();
+        if (error) throw error;
+        clientRow = data;
+        c.remoteClientId = data.id;
+      }
+
+      let surveyRow;
+      let createdSurvey = false;
+      if (c.remoteSurveyId) {
+        const { data, error } = await client.from("clima_surveys").update({
+          title: "Estudo de Clima Organizacional - " + c.name,
+          is_open: true
+        }).eq("id", c.remoteSurveyId).select().single();
+        if (error) throw error;
+        surveyRow = data;
+      } else {
+        const { data, error } = await client.from("clima_surveys").insert({
+          client_id: clientRow.id,
+          title: "Estudo de Clima Organizacional - " + c.name,
+          is_open: true
+        }).select().single();
+        if (error) throw error;
+        surveyRow = data;
+        c.remoteSurveyId = data.id;
+        c.publicToken = data.public_token;
+        createdSurvey = true;
+      }
+      c.publicToken = surveyRow.public_token;
+      if (createdSurvey && (c.responses || []).length) {
+        const payload = c.responses.map(r => toSupabaseResponse(r, surveyRow.id, surveyRow.public_token));
+        const { error } = await client.from("clima_responses").insert(payload);
+        if (error) throw error;
+      }
+      saveState();
+    }
+
+    async function loadSupabaseCompanies() {
+      const client = getSupabase();
+      if (!client) throw new Error("Supabase não configurado.");
+      const user = await refreshSupabaseUser();
+      if (!user) throw new Error("Faça login antes de carregar empresas.");
+      const { data: clients, error: clientError } = await client
+        .from("clima_clients")
+        .select("*, clima_surveys(*)")
+        .order("created_at", { ascending: false });
+      if (clientError) throw clientError;
+      const companies = [];
+      for (const row of clients || []) {
+        const survey = (row.clima_surveys || [])[0];
+        let responses = [];
+        if (survey) {
+          const { data, error } = await client.from("clima_responses").select("*").eq("survey_id", survey.id).order("submitted_at", { ascending: true });
+          if (error) throw error;
+          responses = (data || []).map(fromSupabaseResponse);
+        }
+        companies.push({
+          id: row.id,
+          remoteClientId: row.id,
+          remoteSurveyId: survey?.id || null,
+          publicToken: survey?.public_token || null,
+          name: row.name,
+          sector: row.sector || "",
+          expected: row.expected_responses || 0,
+          departments: row.departments || [],
+          areas: row.areas || [],
+          locations: row.locations || [],
+          createdAt: row.created_at,
+          responses
+        });
+      }
+      if (companies.length) {
+        state.companies = companies;
+        activeCompanyId = companies[0].id;
+        saveState();
+      }
+    }
+
+    function fromSupabaseResponse(r) {
+      return {
+        id: r.id,
+        date: r.submitted_at,
+        consent: r.consent,
+        gender: r.gender,
+        age: r.age,
+        area: r.area,
+        department: r.department,
+        location: r.location,
+        tenure: r.tenure,
+        workMode: r.work_mode,
+        enps: r.enps,
+        open1: r.open1,
+        open2: r.open2,
+        open3: r.open3,
+        answers: r.answers || {}
+      };
+    }
+
+    function toSupabaseResponse(r, surveyId, token) {
+      return {
+        survey_id: surveyId,
+        survey_token: token,
+        consent: true,
+        gender: r.gender || "N/D",
+        age: r.age || "N/D",
+        area: r.area || "N/D",
+        department: r.department || "N/D",
+        location: r.location || "N/D",
+        tenure: r.tenure || "N/D",
+        work_mode: r.workMode || "N/D",
+        enps: Number.isFinite(Number(r.enps)) ? Number(r.enps) : null,
+        answers: r.answers || {},
+        open1: r.open1 || "",
+        open2: r.open2 || "",
+        open3: r.open3 || ""
+      };
+    }
+
+    function download(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function slug(s) {
+      return normalize(s).replace(/\s+/g, "-") || "cliente";
+    }
+
+    function drawBarChart(canvas, labels, values) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,w,h);
+      const max = 5, left = 260, top = 24, rowH = 25, barW = w - left - 60;
+      ctx.font = "13px Aptos, Arial";
+      labels.forEach((label, i) => {
+        const y = top + i * rowH;
+        const val = values[i] || 0;
+        ctx.fillStyle = "#14252d";
+        ctx.fillText(label.length > 32 ? label.slice(0, 31) + "…" : label, 12, y + 14);
+        ctx.fillStyle = "#e9eef0"; ctx.fillRect(left, y, barW, 13);
+        ctx.fillStyle = val >= 4 ? "#2e7d32" : val >= 3.3 ? "#b7791f" : "#b3261e";
+        ctx.fillRect(left, y, barW * val / max, 13);
+        ctx.fillStyle = "#14252d"; ctx.fillText(fmt(val), left + barW + 12, y + 12);
+      });
+    }
+
+    window.addEventListener("hashchange", () => location.reload());
+    if (location.hash.startsWith("#survey/supa/")) renderSurveyFromSupabase(location.hash.split("/")[2]);
+    else if (location.hash.startsWith("#survey/")) renderSurvey(location.hash.split("/")[1]);
+    else setView("setup");
+  </script>
+</body>
+</html>
