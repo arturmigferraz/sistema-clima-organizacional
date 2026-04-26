@@ -502,6 +502,10 @@
       return `${base}#survey/${c.id}`;
     }
 
+    function isSupabaseSurveyReady(c) {
+      return Boolean(c?.publicToken && c?.remoteSurveyId && supaConfig.enabled && supaConfig.url && supaConfig.anonKey);
+    }
+
     function esc(v) {
       return String(v ?? "").replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
     }
@@ -613,6 +617,7 @@
           </div>
           <div class="panel">
             <h2>Link de resposta</h2>
+            <p class="muted"><strong>${isSupabaseSurveyReady(c) ? "Supabase ativo" : "Modo local"}</strong> - ${isSupabaseSurveyReady(c) ? "este link ja pode ser enviado aos trabalhadores e guarda respostas no Supabase." : "faca Login e Sincronizar no bloco Supabase para gerar o link publico."}</p>
             <p class="muted">Use este link quando o questionário for respondido no mesmo ambiente/navegador. Para recolha externa multiutilizador, use Microsoft Forms/Google Forms e importe o CSV.</p>
             <input readonly id="surveyLink" value="${esc(surveyUrl(c))}">
             <div class="toolbar">
@@ -701,10 +706,17 @@
       document.getElementById("syncSupa").onclick = async () => {
         if (document.getElementById("saveSupa").onclick() === false) return;
         try {
-          await syncActiveCompanyToSupabase(c);
+          const syncedSurvey = await syncActiveCompanyToSupabase(c);
           await loadSupabaseCompanies();
-          document.getElementById("supaStatus").textContent = "Sincronização concluída.";
+          const afterLoad = activeCompany();
+          if (afterLoad && syncedSurvey && !afterLoad.publicToken) {
+            afterLoad.remoteSurveyId = syncedSurvey.id;
+            afterLoad.publicToken = syncedSurvey.public_token;
+            saveState();
+          }
           renderSetup(activeCompany());
+          document.getElementById("supaStatus").textContent = "Sincronizacao concluida. Copie o link de resposta ou abra o questionario para testar.";
+          alert("Sincronizacao concluida. O link publico de resposta ja foi gerado no bloco Link de resposta.");
         } catch (err) {
           alert("Erro Supabase: " + err.message);
         }
@@ -1255,6 +1267,7 @@
         if (error) throw error;
       }
       saveState();
+      return surveyRow;
     }
 
     async function loadSupabaseCompanies() {
@@ -1264,12 +1277,23 @@
       if (!user) throw new Error("Faça login antes de carregar empresas.");
       const { data: clients, error: clientError } = await client
         .from("clima_clients")
-        .select("*, clima_surveys(*)")
+        .select("*")
         .order("created_at", { ascending: false });
       if (clientError) throw clientError;
+      const clientIds = (clients || []).map(row => row.id);
+      let surveys = [];
+      if (clientIds.length) {
+        const { data: surveyRows, error: surveyError } = await client
+          .from("clima_surveys")
+          .select("*")
+          .in("client_id", clientIds)
+          .order("created_at", { ascending: false });
+        if (surveyError) throw surveyError;
+        surveys = surveyRows || [];
+      }
       const companies = [];
       for (const row of clients || []) {
-        const survey = (row.clima_surveys || [])[0];
+        const survey = surveys.find(s => s.client_id === row.id);
         let responses = [];
         if (survey) {
           const { data, error } = await client.from("clima_responses").select("*").eq("survey_id", survey.id).order("submitted_at", { ascending: true });
