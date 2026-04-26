@@ -382,8 +382,30 @@
       localStorage.setItem(SUPABASE_KEY, JSON.stringify(supaConfig));
     }
 
+    function normalizeSupabaseUrl(url) {
+      return String(url || "").trim().replace(/\/+$/, "");
+    }
+
+    function validateSupabaseConfig() {
+      const url = normalizeSupabaseUrl(supaConfig.url);
+      const key = String(supaConfig.anonKey || "").trim();
+      if (!supaConfig.enabled) return { ok: false, message: "Ative a opcao Usar Supabase." };
+      if (!url || !key) return { ok: false, message: "Preencha o Project URL e a Publishable/Anon key." };
+      if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) {
+        return { ok: false, message: "O Project URL deve ter o formato https://xxxxxxxxxxxx.supabase.co. Nao use o link do GitHub, nem o link do dashboard do Supabase." };
+      }
+      if (!(key.startsWith("sb_publishable_") || key.startsWith("eyJ"))) {
+        return { ok: false, message: "Use uma Publishable key (sb_publishable_...) ou a legacy anon public key (eyJ...). Nunca use a secret/service_role key." };
+      }
+      supaConfig.url = url;
+      supaConfig.anonKey = key;
+      return { ok: true };
+    }
+
     function getSupabase() {
       if (!supaConfig.enabled || !supaConfig.url || !supaConfig.anonKey || !window.supabase) return null;
+      const valid = validateSupabaseConfig();
+      if (!valid.ok) throw new Error(valid.message);
       if (!supa) supa = window.supabase.createClient(supaConfig.url, supaConfig.anonKey);
       return supa;
     }
@@ -605,8 +627,8 @@
             <label><input id="supaEnabled" type="checkbox" style="width:auto" ${supaConfig.enabled ? "checked" : ""}> Usar Supabase</label>
             <label>Project URL</label>
             <input id="supaUrl" value="${esc(supaConfig.url || "")}" placeholder="https://xxxxx.supabase.co">
-            <label>Anon public key</label>
-            <input id="supaAnon" value="${esc(supaConfig.anonKey || "")}" placeholder="eyJhbGciOi...">
+            <label>Publishable key ou Anon public key</label>
+            <input id="supaAnon" value="${esc(supaConfig.anonKey || "")}" placeholder="sb_publishable_... ou eyJhbGciOi...">
             <div class="field-row">
               <div><label>Email consultora</label><input id="supaEmail" type="email" placeholder="email@empresa.pt"></div>
               <div><label>Password</label><input id="supaPassword" type="password"></div>
@@ -642,25 +664,42 @@
       document.getElementById("importAll").onchange = importBase;
       document.getElementById("saveSupa").onclick = () => {
         supaConfig.enabled = document.getElementById("supaEnabled").checked;
-        supaConfig.url = document.getElementById("supaUrl").value.trim();
+        supaConfig.url = normalizeSupabaseUrl(document.getElementById("supaUrl").value);
         supaConfig.anonKey = document.getElementById("supaAnon").value.trim();
+        const valid = validateSupabaseConfig();
+        if (!valid.ok) {
+          document.getElementById("supaStatus").textContent = valid.message;
+          alert(valid.message);
+          return false;
+        }
         supa = null;
+        supaUser = null;
         saveSupabaseConfig();
-        document.getElementById("supaStatus").textContent = "Configuração Supabase guardada.";
+        document.getElementById("supaStatus").textContent = "Configuracao Supabase guardada. Agora faca Login.";
+        return true;
       };
       document.getElementById("loginSupa").onclick = async () => {
-        document.getElementById("saveSupa").click();
-        const client = getSupabase();
-        if (!client) return alert("Configure URL e anon key do Supabase.");
-        const email = document.getElementById("supaEmail").value.trim();
-        const password = document.getElementById("supaPassword").value;
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
-        if (error) return alert("Erro de login: " + error.message);
-        supaUser = data.user;
-        document.getElementById("supaStatus").textContent = "Login efetuado: " + supaUser.email;
+        if (document.getElementById("saveSupa").onclick() === false) return;
+        try {
+          const client = getSupabase();
+          if (!client) return alert("Configure URL e Publishable/Anon key do Supabase.");
+          const email = document.getElementById("supaEmail").value.trim();
+          const password = document.getElementById("supaPassword").value;
+          const { data, error } = await client.auth.signInWithPassword({ email, password });
+          if (error) return alert("Erro de login: " + error.message);
+          supaUser = data.user;
+          document.getElementById("supaStatus").textContent = "Login efetuado: " + supaUser.email;
+        } catch (err) {
+          const msg = String(err?.message || err);
+          if (msg.includes("Unexpected token '<'") || msg.includes("<html")) {
+            alert("Erro Supabase: a aplicacao recebeu uma pagina HTML em vez de resposta da API. Confirme que o Project URL e exatamente https://xxxxxxxxxxxx.supabase.co e volte a carregar a pagina com Ctrl+F5.");
+          } else {
+            alert("Erro Supabase: " + msg);
+          }
+        }
       };
       document.getElementById("syncSupa").onclick = async () => {
-        document.getElementById("saveSupa").click();
+        if (document.getElementById("saveSupa").onclick() === false) return;
         try {
           await syncActiveCompanyToSupabase(c);
           await loadSupabaseCompanies();
